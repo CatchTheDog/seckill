@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.majq.seckill.dao.local.UserDao">
+	<resultMap id="userDefaultMap" type="com.majq.seckill.domain.User">
+		<result column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="age" property="age"/>
+		<result column="job" property="job"/>
+		<result column="registeTime" property="registeTime"/>
+		<result column="lastUpdateTime" property="lastUpdateTime"/>
+	
+	</resultMap>
+	<select id="queryList" resultMap="userDefaultMap">
+		select id,name,age,job,registeTime,lastUpdateTime from user_info
+	</select>
+</mapper>
