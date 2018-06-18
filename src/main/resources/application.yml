@@ -2,7 +2,7 @@
 server:
   port: 8080
 mybatis:
-  #config-location: classpath:mybatis.xml
+  config-location: classpath:mybatis.xml
   mapper-locations:
      - classpath:mapping/*.xml
   type-aliases-package: com.majq.seckill.domain
@@ -33,6 +33,9 @@ spring:
         login-username: admin
         login-password: admin123
         allow: 127.0.0.1
+  mvc:
+    view:
+      suffix: .html
 logging:
   config: classpath:logback-spring.xml
 
