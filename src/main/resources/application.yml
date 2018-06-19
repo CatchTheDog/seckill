@@ -14,7 +14,7 @@ pagehelper:
 spring:
   datasource:
     druid:
-      filter: stat
+      filter: stat,wall,log4j
       initial-size: 5
       max-active: 20
       min-idle: 5
@@ -33,9 +33,16 @@ spring:
         login-username: admin
         login-password: admin123
         allow: 127.0.0.1
+  resources:
+    static-locations:
+      - classpath:/static/img/
+      - classpath:/static/css/
+      - classpath:/static/js/
   mvc:
-    view:
-      suffix: .html
+    static-path-pattern: /resources/**
+  thymeleaf:
+    suffix: .html
+    prefix: classpath:/templates/
 logging:
   config: classpath:logback-spring.xml
 
