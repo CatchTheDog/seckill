@@ -6,3 +6,5 @@
     使用thymeleaf，版本配置合理，使用一般配置即可；如果使用@RestController，需要使用ModelAndView;在controller方法上使用异步线程注解会导致controller无法访问到。
 4.线程池配置  druid配置结束
 5.连接池配置
+6.文件修改保存后自动重启——devtools配置
+    IDEA自动重新编译配置很重要，如果IDE没有重新编译，就无法触发重启。

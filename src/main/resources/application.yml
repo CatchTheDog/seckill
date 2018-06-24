@@ -41,7 +41,7 @@ spring:
   mvc:
     static-path-pattern: /static/**
   thymeleaf:
-    mode: HTML5
+    mode: HTML
     encoding: UTF-8
     servlet:
       content-type: text/html

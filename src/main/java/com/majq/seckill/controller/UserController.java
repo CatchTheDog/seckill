@@ -26,7 +26,7 @@ public class UserController {
 	public List<User> getUserList() {
 		logger.info("这是info日志！");
 		logger.debug("这是debug日志");
-		logger.error("这是debug日志");
+		logger.error("这是一个error日志！");
 		logger.warn("这是warn日志");
 		logger.trace("这是trance日志");
 		List<User> list = userService.getUserList();
