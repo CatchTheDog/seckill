@@ -1,20 +1,18 @@
 package com.majq.seckill.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.majq.seckill.config.ExecutorConfig;
 import com.majq.seckill.domain.User;
 import com.majq.seckill.service.imp.UserServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.annotation.Resource;
 import java.util.List;
-
 @Controller
 @RequestMapping("/user")
 public class UserController {
@@ -24,7 +22,6 @@ public class UserController {
 	private ObjectMapper objectMapper;
 	private Logger logger = LoggerFactory.getLogger(UserController.class);
 
-	@Async(ExecutorConfig.ASYNCSERVICEEXCUTOR)
 	@RequestMapping("/getUserList")
 	public List<User> getUserList() {
 		logger.info("这是info日志！");
@@ -36,11 +33,11 @@ public class UserController {
 		return list;
 	}
 
-	@Async(ExecutorConfig.ASYNCSERVICEEXCUTOR)
-	@RequestMapping("/index")
-	public ModelAndView logIn() {
+
+	@RequestMapping(value = "/index", method = RequestMethod.GET)
+	public String logIn(Model model) {
 		logger.info("log in success!");
-		ModelAndView view = new ModelAndView("index");
-		return view;
+		model.addAttribute("value", "majq");
+		return "index";
 	}
 }

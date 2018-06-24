@@ -39,11 +39,14 @@ spring:
       - classpath:/static/css/
       - classpath:/static/js/
   mvc:
-    static-path-pattern: /resources/**
+    static-path-pattern: /static/**
   thymeleaf:
-    suffix: .html
+    mode: HTML5
+    encoding: UTF-8
+    servlet:
+      content-type: text/html
+    cache: false
     prefix: classpath:/templates/
-logging:
-  config: classpath:logback-spring.xml
+    suffix: .html
 
         

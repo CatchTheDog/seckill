@@ -59,12 +59,13 @@ public class WebConfig implements WebMvcConfigurer {
 
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
-
+		//registry.addViewController("/index").setViewName("index");
 	}
 
 	@Override
 	public void configureViewResolvers(ViewResolverRegistry registry) {
-
+		//ThymeleafViewResolver resolver = new ThymeleafViewResolver();
+		//registry.viewResolver(resolver);
 	}
 
 	@Override
