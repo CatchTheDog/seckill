@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.majq.seckill.dao.local.GeneratorDao">
+	<resultMap id="gerneratorMap" type="com.majq.seckill.domain.Generator">
+		<result column="COLUMN_NAME" property="columnName"/>
+		<result column="COLUMN_TYPE" property="columnType"/>
+		<result column="DATA_TYPE" property="dataType"/>
+		<result column="CHARACTER_MAXIMUM_LENGTH" property="characterMaximumLength"/>
+		<result column="IS_NULLABLE" property="isNullable"/>
+		<result column="COLUMN_DEFAULT" property="columnDefault"/>
+		<result column="COLUMN_COMMENT" property="columnComment"/>
+	</resultMap>
+	<select id="getTableStructure" resultMap="gerneratorMap">
+		SELECT
+		  COLUMN_NAME as 'COLUMN_NAME',
+		  COLUMN_TYPE as 'COLUMN_TYPE',
+		  DATA_TYPE as 'DATA_TYPE',
+		  CHARACTER_MAXIMUM_LENGTH as 'CHARACTER_MAXIMUM_LENGTH',
+		  IS_NULLABLE as 'IS_NULLABLE',
+		  COLUMN_DEFAULT as 'COLUMN_DEFAULT',
+		  COLUMN_COMMENT as 'COLUMN_COMMENT'
+		FROM
+		 INFORMATION_SCHEMA.COLUMNS
+		where
+		table_name  = #{tableName}
+	</select>
+</mapper>
