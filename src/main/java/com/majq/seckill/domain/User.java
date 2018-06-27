@@ -6,6 +6,9 @@ import java.sql.Timestamp;
  * user bean
  */
 public class User {
+	/**
+	 *
+	 */
 	private Integer id;
 	private String name;
 	private Integer age;
@@ -63,13 +66,14 @@ public class User {
 
 	@Override
 	public String toString() {
-		return "User{" +
-				"id=" + id +
-				", name='" + name + '\'' +
-				", age=" + age +
-				", job='" + job + '\'' +
-				", registeTime=" + registeTime +
-				", lastUpdateTime=" + lastUpdateTime +
-				'}';
+		final StringBuilder sb = new StringBuilder("User{");
+		sb.append("id=").append(id);
+		sb.append(", name='").append(name).append('\'');
+		sb.append(", age=").append(age);
+		sb.append(", job='").append(job).append('\'');
+		sb.append(", registeTime=").append(registeTime);
+		sb.append(", lastUpdateTime=").append(lastUpdateTime);
+		sb.append('}');
+		return sb.toString();
 	}
 }

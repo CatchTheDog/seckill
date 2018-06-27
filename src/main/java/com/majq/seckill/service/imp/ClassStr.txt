@@ -1,6 +1,15 @@
-public class %s
-{
-    %s
-    %s
-    s%
+%s
+
+%s
+
+/**
+ * Auto generated
+ */
+public class s% {
+%s
+
+
+%s
+
+%s
 }

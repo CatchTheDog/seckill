@@ -1,0 +1,3 @@
+public %s %s() {
+		return %s;
+	}

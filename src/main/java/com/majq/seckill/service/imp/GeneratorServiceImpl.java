@@ -1,5 +1,6 @@
 package com.majq.seckill.service.imp;
 
+import com.majq.seckill.common.utils.FileUtils;
 import com.majq.seckill.dao.local.GeneratorDao;
 import com.majq.seckill.domain.Generator;
 import com.majq.seckill.service.GeneratorService;
@@ -10,6 +11,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,18 +22,7 @@ public class GeneratorServiceImpl implements GeneratorService {
 	private GeneratorDao generatorDao;
 
 	public static void main(String[] args) {
-		String filedStr = "\tprivate %s %s;\n";
-		String getStr = "public %s get%s() {\n" +
-				"\t\treturn %s;\n" +
-				"\t}";
-		String setStr = "public void set%s(%s %s) {\n" +
-				"\t\tthis.%s = %s;\n" +
-				"\t}";
-
-		String name = "Id";
-		System.out.println(String.format(filedStr, name, name));
-		System.out.println(String.format(getStr, name, name, name));
-		System.out.println(String.format(setStr, name, name, name, name, name));
+		generateFileNameByColumnName("a", "a", "a");
 	}
 	//使用字符串格式化设置各个文件模板，然后依据表结构自动生成模板填充内容
 	//生成文件内容字符串后，直接将字符串写入到本地文件中；
@@ -53,6 +44,30 @@ public class GeneratorServiceImpl implements GeneratorService {
 	}
 
 	/**
+	 * 根据表结构信息生成Bean字段
+	 *
+	 * @param columnName
+	 * @param columnTYpe
+	 * @param columnComment
+	 * @return
+	 */
+	private static String generateFileNameByColumnName(String columnName, String columnTYpe, String columnComment) {
+		if (!StringUtils.isEmpty(columnName) && !StringUtils.isEmpty(columnTYpe)) {
+			//读取字段格式化字符串
+			try {
+				String formatStr = FileUtils.readContentFromFile("G:/ide_workspace/seckill/src/main/java/com/majq/seckill/service/imp/FieldStr.txt");
+				System.out.println(formatStr);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			//根据列字段名 生成bean字段名
+			//根据列类型  映射bean字段类型
+			//使用格式化字符串
+		}
+		return "";
+	}
+
+	/**
 	 * 依据数据库表结构生成javabean
 	 *
 	 * @param beanClassName beanClass名称
@@ -65,15 +80,6 @@ public class GeneratorServiceImpl implements GeneratorService {
 			return false;
 		}
 		List<String> filedNames = new ArrayList<>();
-		String filedStr = "\tprivate %s %s;\n";
-		String getStr = "public %s get%s() {\n" +
-				"\t\treturn %s;\n" +
-				"\t}";
-		String setStr = "public void set%s(%s %s) {\n" +
-				"\t\tthis.%s = %s;\n" +
-				"\t}";
-		String toStringstr = "";
-		String commentStr = "";
 		for (Generator generator : generators) {
 			String columnName = generator.getColumnName(); //列名
 			String columnType = generator.getColumnType();
@@ -83,10 +89,12 @@ public class GeneratorServiceImpl implements GeneratorService {
 			String columnDefault = generator.getColumnDefault();
 			String columnComment = generator.getColumnComment();
 
-			String filedName = generatorCamelName(columnName);
+			filedNames.add(generatorCamelName(columnName));
 		}
 		return false;
 	}
+
+
 
 	/**
 	 * 将原始字符串转换为驼峰规则的字符串
@@ -136,14 +144,4 @@ public class GeneratorServiceImpl implements GeneratorService {
 		return false;
 	}
 
-	/**
-	 * 将生成的文件写入到本地文件中
-	 *
-	 * @param path    需要写入的文件路径
-	 * @param content 需要写入的内容
-	 * @return 写入是否成功 true:成功  false:失败
-	 */
-	private boolean writeFile(String path, String fileName, String content) {
-		return false;
-	}
 }
