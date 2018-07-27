@@ -1,7 +1,10 @@
 package com.majq.seckill.service.imp;
 
-import com.majq.seckill.common.utils.FileUtils;
+import com.majq.seckill.common.consts.*;
+import com.majq.seckill.common.utils.StrUtils;
 import com.majq.seckill.dao.local.GeneratorDao;
+import com.majq.seckill.domain.BeanField;
+import com.majq.seckill.domain.BeanInfo;
 import com.majq.seckill.domain.Generator;
 import com.majq.seckill.service.GeneratorService;
 import org.slf4j.Logger;
@@ -11,137 +14,274 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
-import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class GeneratorServiceImpl implements GeneratorService {
-	private static Logger logger = LoggerFactory.getLogger(GeneratorServiceImpl.class);
-	@Resource
-	private GeneratorDao generatorDao;
+    /**
+     * 日志对象
+     */
+    private static Logger logger = LoggerFactory.getLogger(GeneratorServiceImpl.class);
+    @Resource
+    private GeneratorDao generatorDao;
 
-	public static void main(String[] args) {
-		generateFileNameByColumnName("a", "a", "a");
-	}
-	//使用字符串格式化设置各个文件模板，然后依据表结构自动生成模板填充内容
-	//生成文件内容字符串后，直接将字符串写入到本地文件中；
+    /**
+     * 根据表名获取表结构信息
+     *
+     * @param tableName
+     * @return
+     */
+    @Override
+    public BeanInfo getBeanInfo(String tableName) {
+        if (StringUtils.isEmpty(tableName)) {
+            logger.info("tableName can't be null!");
+            return null;
+        }
+        List<Generator> generators = getTableInfo(tableName);
+        if (!CollectionUtils.isEmpty(generators)) {
+            return assembleBeanInfo(tableName, generators);
+        }
+        return null;
+    }
 
-	@Override
-	public void generateMapperCode(String tableName) {
-		if (StringUtils.isEmpty(tableName)) {
-			logger.error("the table name can not null!");
-			return;
-		}
-		List<Generator> generator = generatorDao.getTableStructure(tableName);
-		if (null == generator) {
-			logger.error("the table :{} not exist!", tableName);
-		}
-		StringBuffer beanClassName = new StringBuffer(generatorCamelName(tableName));
-		StringBuffer daoClassName = beanClassName.append("Dao");
-		//生成java文件 bean,dao
-		//生成xml文件
-	}
+    /**
+     * 根据表名获取数据库表结构信息
+     *
+     * @param tableName
+     * @return
+     */
+    private List<Generator> getTableInfo(String tableName) {
+        if (StringUtils.isEmpty(tableName)) {
+            logger.error("the table name can not null!");
+            return null;
+        }
+        List<Generator> generators = generatorDao.getTableStructure(tableName);
+        if (CollectionUtils.isEmpty(generators)) {
+            logger.error("the table :{} not exist!", tableName);
+        }
+        return generators;
+    }
 
-	/**
-	 * 根据表结构信息生成Bean字段
-	 *
-	 * @param columnName
-	 * @param columnTYpe
-	 * @param columnComment
-	 * @return
-	 */
-	private static String generateFileNameByColumnName(String columnName, String columnTYpe, String columnComment) {
-		if (!StringUtils.isEmpty(columnName) && !StringUtils.isEmpty(columnTYpe)) {
-			//读取字段格式化字符串
-			try {
-				String formatStr = FileUtils.readContentFromFile("G:/ide_workspace/seckill/src/main/java/com/majq/seckill/service/imp/FieldStr.txt");
-				System.out.println(formatStr);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			//根据列字段名 生成bean字段名
-			//根据列类型  映射bean字段类型
-			//使用格式化字符串
-		}
-		return "";
-	}
-
-	/**
-	 * 依据数据库表结构生成javabean
-	 *
-	 * @param beanClassName beanClass名称
-	 * @param generators    数据库表结构bean
-	 * @return 生成文件是否成功 true:成功，false:失败
-	 */
-	private boolean generatorBean(String beanClassName, List<Generator> generators) {
-		if (StringUtils.isEmpty(beanClassName) || CollectionUtils.isEmpty(generators)) {
-			logger.error("beanClassName:{},generator{} can not be null!", beanClassName, generators);
-			return false;
-		}
-		List<String> filedNames = new ArrayList<>();
-		for (Generator generator : generators) {
-			String columnName = generator.getColumnName(); //列名
-			String columnType = generator.getColumnType();
-			String dataType = generator.getDataType();
-			String characterMaximumLength = generator.getCharacterMaximumLength();
-			String isNullable = generator.getIsNullable();
-			String columnDefault = generator.getColumnDefault();
-			String columnComment = generator.getColumnComment();
-
-			filedNames.add(generatorCamelName(columnName));
-		}
-		return false;
-	}
+    /**
+     * 通过数据库表结构信息组装BeanInfo
+     *
+     * @param tableName
+     * @param generators
+     * @return
+     */
+    private BeanInfo assembleBeanInfo(String tableName, List<Generator> generators) {
+        if (StringUtils.isEmpty(tableName) || CollectionUtils.isEmpty(generators)) {
+            logger.error("beanClassName:{},generator{} can not be null!", tableName, generators);
+            return null;
+        }
+        BeanInfo beanInfo = new BeanInfo();
+        //表名——>bean名称
+        beanInfo.setBeanName(StrUtils.generatorCamelName(tableName));
+        List<BeanField> beanFields = new ArrayList<>();
+        for (Generator generator : generators) {
+            BeanField beanField = new BeanField();
+            beanField.setFieldName(StrUtils.generatorCamelName(generator.getColumnName())); //列名
+            beanField.setFieldType(StrUtils.generatorCamelName(generator.getColumnType()));
+            beanField.setDataType(StrUtils.generatorCamelName(generator.getDataType()));
+            beanField.setMaxLength(StrUtils.generatorCamelName(generator.getCharacterMaximumLength()));
+            beanField.setIsNullable(StrUtils.generatorCamelName(generator.getIsNullable()));
+            beanField.setDefaultValue(StrUtils.generatorCamelName(generator.getColumnDefault()));
+            beanField.setDescription(StrUtils.generatorCamelName(generator.getColumnComment()));
+            beanFields.add(beanField);
+        }
+        beanInfo.setFields(beanFields);
+        return beanInfo;
+    }
 
 
-
-	/**
-	 * 将原始字符串转换为驼峰规则的字符串
-	 *
-	 * @param originalStr 原始字符串
-	 * @return bean 驼峰规则的字符串
-	 */
-	private String generatorCamelName(String originalStr) {
-		if (StringUtils.isEmpty(originalStr)) {
-			logger.error("originalStr can not be null!");
-			return null;
-		}
-		String finalStr = StringUtils.capitalize(originalStr);
-		boolean isContainUnderline = originalStr.contains("_");
-		if (isContainUnderline) {
-			String[] tempStrs = originalStr.split("_");
-			StringBuffer strBuffer = new StringBuffer();
-			if (null != tempStrs && tempStrs.length > 0) {
-				for (int i = 0; i < tempStrs.length; i++) {
-					String tempStr = tempStrs[i];
-					strBuffer.append(StringUtils.capitalize(tempStr));
-				}
-				finalStr = strBuffer.toString();
-			}
-		}
-		return finalStr;
-	}
+    /**
+     * 根据表结构信息生成javabean
+     *
+     * @param beanInfo
+     * @return
+     */
+    @Override
+    public boolean generaterBeanClass(BeanInfo beanInfo) {
+        if (null == beanInfo) {
+            logger.error("beanInfo cannot be null !");
+            return false;
+        }
+        String classStr = getBeanClassCodeStr(beanInfo);
 
 
-	/**
-	 * 依据数据库表生成dao
-	 *
-	 * @param generator 数据库表结构
-	 * @return 生成DAO是否成功 true:成功 false:失败
-	 */
-	private boolean generatorDao(List<Generator> generator) {
-		return false;
-	}
+        //生成文件
 
-	/**
-	 * 依据数据库表结构生成XML文件
-	 *
-	 * @param generator 数据库表结构bean
-	 * @return 生成XML文件是否成功 true:成功 false:失败
-	 */
-	private boolean generatorXML(List<Generator> generator) {
-		return false;
-	}
 
+        return false;
+    }
+
+
+    private String getBeanClassCodeStr(BeanInfo beanInfo) {
+        if (null == beanInfo) {
+            logger.error("beanInfo cannot be null !");
+            return "";
+        }
+        //包声明
+        String packageStr = getPackageDeclareStr(CommonConst.BEAN_PACKAGE_PATH);
+        //import 语句
+        String importStr = getImportStr(BeanImportEnum.class);
+        //字段声明，getset,toString
+        String otherStr = getBeanOtherStr(beanInfo);
+        //类
+        return String.format(CodeEnum.ClassStr.getCodeStr(), packageStr, importStr, otherStr);
+    }
+
+    /**
+     * 生成包声明语句
+     *
+     * @param packagePath
+     * @return
+     */
+    private String getPackageDeclareStr(String packagePath) {
+        if (StringUtils.isEmpty(packagePath)) {
+            logger.error("packagePath can not be null!");
+            return "";
+        }
+        return String.format(CodeEnum.PackageStr.getCodeStr(), packagePath) + CommonConst.NEW_LINE;
+    }
+
+    /**
+     * 生成import语句
+     *
+     * @param enumClass 对应导入枚举类
+     * @param <T>
+     * @return
+     * @throws NoSuchMethodException
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     */
+    private <T> String getImportStr(Class<T> enumClass) {
+        if (null == enumClass) {
+            logger.error("enumClass can not be null!");
+            return "";
+        }
+        StringBuffer codeStr = new StringBuffer();
+        try {
+            T[] importEnums = enumClass.getEnumConstants();
+            Method getImportContent = enumClass.getMethod("getImportContent");
+            for (T importEnum : importEnums) {
+                codeStr.append(String.format(CodeEnum.ImportStr.getCodeStr(), getImportContent.invoke(importEnum))).append(CommonConst.NEW_LINE);
+            }
+        } catch (Exception e) {
+            logger.error("generate import code str error:{}!", e.getCause());
+        }
+        return codeStr.toString();
+    }
+
+    /**
+     * 获取其他信息代码
+     *
+     * @param beanInfo
+     * @return
+     */
+    private String getBeanOtherStr(BeanInfo beanInfo) {
+        if (null == beanInfo) {
+            logger.error("beanInfo can not be null!");
+            return "";
+        }
+        StringBuffer fieldStr = new StringBuffer();
+        StringBuffer gsetterStr = new StringBuffer();
+        StringBuffer toStringSubStr = new StringBuffer();
+        List<BeanField> beanFields = beanInfo.getFields();
+        String beanName = beanInfo.getBeanName();
+        String dbType = "";
+        if (!CollectionUtils.isEmpty(beanFields)) {
+            for (BeanField beanField : beanFields) {
+                if (null != beanField) {
+                    String fieldName = StrUtils.generatorCamelName(beanField.getFieldName());
+                    String fieldDataType = DataTypeEnum.getDataTypeByDbAndType(DbTypeEnum.getEnumByDbType(dbType), beanField.getDataType());
+                    String fieldComment = beanField.getDescription();
+                    //字段
+                    fieldStr.append(getBeanFieldStr(fieldName, fieldDataType, fieldComment));
+                    //getset
+                    gsetterStr.append(getGsetterStr(fieldName, fieldDataType));
+                    //toString
+                    toStringSubStr.append(getToStringStr(fieldName, fieldDataType));
+                }
+            }
+        }
+        String toStringStr = String.format(CodeEnum.ToStringStr.getCodeStr(), beanName, toStringSubStr) + CommonConst.NEW_LINE;
+        return fieldStr.append(gsetterStr).append(toStringStr).toString();
+    }
+
+    /**
+     * 获取字段
+     *
+     * @param fieldName
+     * @param fieldDataType
+     * @param fieldComment
+     * @return
+     */
+    private String getBeanFieldStr(String fieldName, String fieldDataType, String fieldComment) {
+        if (!StringUtils.isEmpty(fieldName) && StringUtils.isEmpty(fieldDataType)) {
+            return String.format(CodeEnum.FieldStr.getCodeStr(), fieldComment, fieldDataType, fieldName) + CommonConst.NEW_LINE;
+        }
+        return "";
+    }
+
+
+    /**
+     * 获取get set 方法
+     *
+     * @param fieldName
+     * @param fieldDataType
+     * @return
+     */
+    private String getGsetterStr(String fieldName, String fieldDataType) {
+        if (!StringUtils.isEmpty(fieldName) && StringUtils.isEmpty(fieldDataType)) {
+            StringBuffer gsetterStr = new StringBuffer();
+            String getterName = "get" + StringUtils.capitalize(fieldName);
+            String setterName = "set" + StringUtils.capitalize(fieldName);
+            gsetterStr.append(String.format(CodeEnum.GetterStr.getCodeStr(), fieldDataType, getterName, fieldName)).append(CommonConst.NEW_LINE);
+            gsetterStr.append(String.format(CodeEnum.SetterStr.getCodeStr(), setterName, fieldDataType, fieldName, fieldName, fieldName)).append(CommonConst.NEW_LINE);
+            return gsetterStr.toString();
+        }
+        return "";
+    }
+
+    /**
+     * 生成toString方法代码
+     *
+     * @param fieldName
+     * @param fieldDataType
+     * @return
+     */
+    private String getToStringStr(String fieldName, String fieldDataType) {
+        if (!StringUtils.isEmpty(fieldName) && StringUtils.isEmpty(fieldDataType)) {
+            if (fieldDataType.equals(JavaDataTypeEnum.IntegerType.getDataType()))
+                return String.format(CodeEnum.IntegerAppender.getCodeStr(), fieldName, fieldName);
+            else return String.format(CodeEnum.OTHERAppender.getCodeStr(), fieldName, fieldName);
+        }
+        return "";
+    }
+
+    /**
+     * 根据表结构信息生成mapper
+     *
+     * @param beanInfo
+     * @return
+     */
+    @Override
+    public boolean generateMapperClass(BeanInfo beanInfo) {
+        return false;
+    }
+
+    /**
+     * 根据表结构信息生成XML
+     *
+     * @param beanInfo
+     * @return
+     */
+    @Override
+    public boolean generateMapperXml(BeanInfo beanInfo) {
+        return false;
+    }
 }

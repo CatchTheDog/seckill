@@ -3,8 +3,8 @@
 	<contextName>seckill</contextName>
 	<timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
 	<!--日志文件生成根目录-->
-	<property name="LOG_HOME" value="g:/ide_workspace/seckill/log"/>
-	
+    <property name="LOG_HOME" value="c:/workspace/seckill/log"/>
+
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
 			<pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%highlight(%-5level)] [%boldYellow(%-15thread)] [%boldGreen(%-100logger)] [%msg]%n
@@ -12,7 +12,7 @@
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>
-	
+
 	<appender name="ROOLING_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>${LOG_HOME}/seckill.log</file>
 		<append>true</append>
@@ -55,7 +55,7 @@
 		<appender-ref ref="STDOUT"/>
 		<appender-ref ref="ROOLING_FILE"/>
 	</root>
-	
+
 	<logger name="com.apache.ibatis" level="WARN" additivity="false">
 		<appender-ref ref="ROOLING_FILE"/>
 	</logger>

@@ -1,3 +1,0 @@
-public void %s(%s %s) {
-		this.%s = %s;
-	}

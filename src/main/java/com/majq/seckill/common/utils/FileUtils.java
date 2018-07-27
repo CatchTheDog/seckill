@@ -364,4 +364,29 @@ public class FileUtils {
 		return content.toString();
 	}
 
+    /**
+     * 向指定文件中写入字符串内容
+     *
+     * @param path
+     * @param content
+     * @return
+     */
+    public static boolean writeContentToFile(String path, String content) {
+        if (!StringUtils.isEmpty(path) && !StringUtils.isEmpty(content)) {
+            File file = new File(path);
+            try {
+                if (file.isFile()) {
+                    if (!file.exists() && !creatFile(path)) {
+                        return false;
+                    }
+                    //写入文件
+                }
+            } catch (Exception e) {
+                //日志
+            }
+
+        }
+        return false;
+    }
+
 }
