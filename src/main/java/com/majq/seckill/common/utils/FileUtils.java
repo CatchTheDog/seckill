@@ -374,15 +374,28 @@ public class FileUtils {
     public static boolean writeContentToFile(String path, String content) {
         if (!StringUtils.isEmpty(path) && !StringUtils.isEmpty(content)) {
             File file = new File(path);
+            BufferedOutputStream bis = null;
             try {
                 if (file.isFile()) {
                     if (!file.exists() && !creatFile(path)) {
                         return false;
                     }
                     //写入文件
+                    bis = new BufferedOutputStream(new FileOutputStream(file));
+                    byte[] temp = content.getBytes();
+                    bis.write(temp);
+                    return true;
                 }
             } catch (Exception e) {
                 //日志
+            } finally {
+                if (null != bis) {
+                    try {
+                        bis.close();
+                    } catch (IOException e) {
+                        //日志
+                    }
+                }
             }
 
         }

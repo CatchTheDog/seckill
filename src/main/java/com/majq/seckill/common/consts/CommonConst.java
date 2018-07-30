@@ -39,5 +39,17 @@ public class CommonConst {
     public static final String BEAN_PACKAGE_PATH = "com.majq.seckill.domain";
     public static final String IMPORT_JAVA_UTIL = "java.util.*";
     public static final String IMPORT_JAVA_SQL = "java.sql.*";
+
     public static String NEW_LINE = System.getProperty("line.separator");
+
+
+    public static final String INTERFACE_STR = "%s\n" +
+            "\n" +
+            "%s\n" +
+            "\n" +
+            "public interface %s {\n" +
+            "\t%s\n" +
+            "}";
+    public static final String DAO_PACKAGE_PATH = "com.majq.seckill.dao.local";
+
 }

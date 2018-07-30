@@ -1,6 +1,6 @@
 package com.majq.seckill.common.consts;
 
-public enum CodeEnum {
+public enum BeanCodeEnum {
     PackageStr(CommonConst.PACKAGE_STR, "包声明语句"),
     ImportStr(CommonConst.IMPORT_STR, "类导入语句"),
     ClassStr(CommonConst.CLASS_CODE_STR, "类声明语句"),
@@ -20,7 +20,7 @@ public enum CodeEnum {
      */
     private String description;
 
-    CodeEnum(String codeStr, String description) {
+    BeanCodeEnum(String codeStr, String description) {
         this.codeStr = codeStr;
         this.description = description;
     }

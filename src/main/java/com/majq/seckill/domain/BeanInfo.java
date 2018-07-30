@@ -3,8 +3,17 @@ package com.majq.seckill.domain;
 import java.util.List;
 
 public class BeanInfo {
+    private String beanPackage;
     private String beanName;
     private List<BeanField> fields;
+
+    public String getBeanPackage() {
+        return beanPackage;
+    }
+
+    public void setBeanPackage(String beanPackage) {
+        this.beanPackage = beanPackage;
+    }
 
     public String getBeanName() {
         return beanName;
@@ -25,7 +34,8 @@ public class BeanInfo {
     @Override
     public String toString() {
         final StringBuffer sb = new StringBuffer("BeanInfo{");
-        sb.append("beanName='").append(beanName).append('\'');
+        sb.append("beanPackage='").append(beanPackage).append('\'');
+        sb.append(", beanName='").append(beanName).append('\'');
         sb.append(", fields=").append(fields);
         sb.append('}');
         return sb.toString();

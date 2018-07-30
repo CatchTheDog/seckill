@@ -1,6 +1,7 @@
 package com.majq.seckill.service.imp;
 
 import com.majq.seckill.common.consts.*;
+import com.majq.seckill.common.utils.FileUtils;
 import com.majq.seckill.common.utils.StrUtils;
 import com.majq.seckill.dao.local.GeneratorDao;
 import com.majq.seckill.domain.BeanField;
@@ -14,6 +15,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -80,6 +82,7 @@ public class GeneratorServiceImpl implements GeneratorService {
         BeanInfo beanInfo = new BeanInfo();
         //表名——>bean名称
         beanInfo.setBeanName(StrUtils.generatorCamelName(tableName));
+        //beanInfo.setBeanPackage(getPackageDeclareStr(CommonConst.BEAN_PACKAGE_PATH));
         List<BeanField> beanFields = new ArrayList<>();
         for (Generator generator : generators) {
             BeanField beanField = new BeanField();
@@ -110,28 +113,56 @@ public class GeneratorServiceImpl implements GeneratorService {
             return false;
         }
         String classStr = getBeanClassCodeStr(beanInfo);
-
-
         //生成文件
-
-
-        return false;
+        return FileUtils.writeContentToFile(getPathByBeanInfo(beanInfo), classStr);
     }
 
+    /**
+     * 根据beanInfo获取类文件存储路径
+     *
+     * @param beanInfo
+     * @return
+     */
+    private String getPathByBeanInfo(BeanInfo beanInfo) {
+        StringBuffer path = new StringBuffer();
+        if (null != beanInfo && StringUtils.isEmpty(beanInfo.getBeanName()) && StringUtils.isEmpty(beanInfo.getBeanPackage())) {
+            path.append(beanInfo.getBeanPackage()).append(".").append(beanInfo.getBeanName());
+        }
+        return convertPackageToPath(path.toString());
+    }
 
+    /**
+     * 将包路径转换为磁盘路径
+     *
+     * @param packagePath
+     * @return
+     */
+    private String convertPackageToPath(String packagePath) {
+        if (!StringUtils.isEmpty(packagePath)) {
+            return packagePath.replaceAll("\\.", File.separator);
+        }
+        return "";
+    }
+
+    /**
+     * 获取bean类代码
+     *
+     * @param beanInfo
+     * @return
+     */
     private String getBeanClassCodeStr(BeanInfo beanInfo) {
         if (null == beanInfo) {
             logger.error("beanInfo cannot be null !");
             return "";
         }
         //包声明
-        String packageStr = getPackageDeclareStr(CommonConst.BEAN_PACKAGE_PATH);
+        String packageStr = getPackageDeclareStr(CommonConst.BEAN_PACKAGE_PATH, BeanCodeEnum.PackageStr.getCodeStr());
         //import 语句
         String importStr = getImportStr(BeanImportEnum.class);
         //字段声明，getset,toString
         String otherStr = getBeanOtherStr(beanInfo);
         //类
-        return String.format(CodeEnum.ClassStr.getCodeStr(), packageStr, importStr, otherStr);
+        return String.format(BeanCodeEnum.ClassStr.getCodeStr(), packageStr, importStr, otherStr);
     }
 
     /**
@@ -140,12 +171,12 @@ public class GeneratorServiceImpl implements GeneratorService {
      * @param packagePath
      * @return
      */
-    private String getPackageDeclareStr(String packagePath) {
-        if (StringUtils.isEmpty(packagePath)) {
+    private String getPackageDeclareStr(String packagePath, String packageStr) {
+        if (StringUtils.isEmpty(packagePath) || StringUtils.isEmpty(packageStr)) {
             logger.error("packagePath can not be null!");
             return "";
         }
-        return String.format(CodeEnum.PackageStr.getCodeStr(), packagePath) + CommonConst.NEW_LINE;
+        return String.format(packageStr, packagePath) + CommonConst.NEW_LINE;
     }
 
     /**
@@ -168,7 +199,7 @@ public class GeneratorServiceImpl implements GeneratorService {
             T[] importEnums = enumClass.getEnumConstants();
             Method getImportContent = enumClass.getMethod("getImportContent");
             for (T importEnum : importEnums) {
-                codeStr.append(String.format(CodeEnum.ImportStr.getCodeStr(), getImportContent.invoke(importEnum))).append(CommonConst.NEW_LINE);
+                codeStr.append(String.format(BeanCodeEnum.ImportStr.getCodeStr(), getImportContent.invoke(importEnum))).append(CommonConst.NEW_LINE);
             }
         } catch (Exception e) {
             logger.error("generate import code str error:{}!", e.getCause());
@@ -208,7 +239,7 @@ public class GeneratorServiceImpl implements GeneratorService {
                 }
             }
         }
-        String toStringStr = String.format(CodeEnum.ToStringStr.getCodeStr(), beanName, toStringSubStr) + CommonConst.NEW_LINE;
+        String toStringStr = String.format(BeanCodeEnum.ToStringStr.getCodeStr(), beanName, toStringSubStr) + CommonConst.NEW_LINE;
         return fieldStr.append(gsetterStr).append(toStringStr).toString();
     }
 
@@ -222,7 +253,7 @@ public class GeneratorServiceImpl implements GeneratorService {
      */
     private String getBeanFieldStr(String fieldName, String fieldDataType, String fieldComment) {
         if (!StringUtils.isEmpty(fieldName) && StringUtils.isEmpty(fieldDataType)) {
-            return String.format(CodeEnum.FieldStr.getCodeStr(), fieldComment, fieldDataType, fieldName) + CommonConst.NEW_LINE;
+            return String.format(BeanCodeEnum.FieldStr.getCodeStr(), fieldComment, fieldDataType, fieldName) + CommonConst.NEW_LINE;
         }
         return "";
     }
@@ -240,8 +271,8 @@ public class GeneratorServiceImpl implements GeneratorService {
             StringBuffer gsetterStr = new StringBuffer();
             String getterName = "get" + StringUtils.capitalize(fieldName);
             String setterName = "set" + StringUtils.capitalize(fieldName);
-            gsetterStr.append(String.format(CodeEnum.GetterStr.getCodeStr(), fieldDataType, getterName, fieldName)).append(CommonConst.NEW_LINE);
-            gsetterStr.append(String.format(CodeEnum.SetterStr.getCodeStr(), setterName, fieldDataType, fieldName, fieldName, fieldName)).append(CommonConst.NEW_LINE);
+            gsetterStr.append(String.format(BeanCodeEnum.GetterStr.getCodeStr(), fieldDataType, getterName, fieldName)).append(CommonConst.NEW_LINE);
+            gsetterStr.append(String.format(BeanCodeEnum.SetterStr.getCodeStr(), setterName, fieldDataType, fieldName, fieldName, fieldName)).append(CommonConst.NEW_LINE);
             return gsetterStr.toString();
         }
         return "";
@@ -257,8 +288,8 @@ public class GeneratorServiceImpl implements GeneratorService {
     private String getToStringStr(String fieldName, String fieldDataType) {
         if (!StringUtils.isEmpty(fieldName) && StringUtils.isEmpty(fieldDataType)) {
             if (fieldDataType.equals(JavaDataTypeEnum.IntegerType.getDataType()))
-                return String.format(CodeEnum.IntegerAppender.getCodeStr(), fieldName, fieldName);
-            else return String.format(CodeEnum.OTHERAppender.getCodeStr(), fieldName, fieldName);
+                return String.format(BeanCodeEnum.IntegerAppender.getCodeStr(), fieldName, fieldName);
+            else return String.format(BeanCodeEnum.OTHERAppender.getCodeStr(), fieldName, fieldName);
         }
         return "";
     }
@@ -271,7 +302,36 @@ public class GeneratorServiceImpl implements GeneratorService {
      */
     @Override
     public boolean generateMapperClass(BeanInfo beanInfo) {
+        if (null != beanInfo) {
+            String daoClassStr = getMapperClassStr(beanInfo);
+            return FileUtils.writeContentToFile(getPathByBeanInfo(beanInfo), daoClassStr);
+        }
         return false;
+    }
+
+    /**
+     * 获取Mapper 类代码
+     *
+     * @param beanInfo
+     * @return
+     */
+    private String getMapperClassStr(BeanInfo beanInfo) {
+        if (null != beanInfo) {
+            String packageStr = getPackageDeclareStr(CommonConst.DAO_PACKAGE_PATH, DaoCodeEnum.PackageCodeStr.getCodeStr());
+            String importStr = getImportStr(DaoImportEnum.class);
+            String methodStr = getMethodStr();
+            return String.format(DaoCodeEnum.InterfaceCodeStr.getCodeStr(), packageStr, importStr, methodStr);
+        }
+        return "";
+    }
+
+    /**
+     * 获取方法声明
+     *
+     * @return
+     */
+    private String getMethodStr() {
+        return "";
     }
 
     /**
